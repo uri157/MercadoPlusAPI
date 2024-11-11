@@ -15,7 +15,7 @@ public class CardTypeController : ControllerBase
     // Obtener todos los tipos de tarjetas
     [AllowAnonymous]
     [HttpGet]
-    public ActionResult<List<CardType>> GetAllCardTypes()
+    public ActionResult<List<CardTypeDTO>> GetAllCardTypes()
     {
         return Ok(_cardTypeService.GetAll());
     }
@@ -36,7 +36,7 @@ public class CardTypeController : ControllerBase
     // Crear un nuevo tipo de tarjeta
     [Authorize(Roles = "admin")]
     [HttpPost]
-    public ActionResult<CardType> NewCardType(CardTypePutDTO cardTypeDto)
+    public ActionResult<CardTypeDTO> NewCardType(CardTypePutDTO cardTypeDto)
     {
         var newCardType = _cardTypeService.Create(cardTypeDto);
         return CreatedAtAction(nameof(GetById), new { id = newCardType.Id }, newCardType);
@@ -60,7 +60,7 @@ public class CardTypeController : ControllerBase
     // Actualizar un tipo de tarjeta por ID
     [Authorize(Roles = "admin")]
     [HttpPut("{id}")]
-    public ActionResult<CardType> UpdateCardType(int id, CardTypePutDTO updatedCardTypeDto)
+    public ActionResult<CardTypeDTO> UpdateCardType(int id, CardTypePutDTO updatedCardTypeDto)
     {
         var cardType = _cardTypeService.Update(id, updatedCardTypeDto);
         if (cardType == null)

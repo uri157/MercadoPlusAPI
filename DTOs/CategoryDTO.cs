@@ -10,14 +10,6 @@ public class CategoryDTO
     public string? Name { get; set; }
 }
 
-public class CategoryGetAllDTO
-{
-    public int Id { get; set; }
-
-    [Required(ErrorMessage = "El campo Name es requerido.")]
-    [MaxLength(100, ErrorMessage = "El nombre de la categoría no debe exceder los 100 caracteres.")]
-    public string? Name { get; set; }
-}
 
 public class CategoryGetDeleteByIdDTO
 {

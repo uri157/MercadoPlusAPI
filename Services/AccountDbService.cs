@@ -1,17 +1,41 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
-
+using Microsoft.AspNetCore.Mvc;
 
 public class AccountDbService : IAccountService
 {
     private readonly UserManager<User> _userManager;
+    
 
-    public AccountDbService(UserManager<User> userManager) // Constructor with correct return type
+
+    public AccountDbService
+    (
+        UserManager<User> userManager
+    )
     {
         _userManager = userManager;
     }
 
+
+   
+    // public async Task<IActionResult> ConfirmEmailAsync(ConfirmEmailDTO confirmationDTO)
+    // {
+    //     if (confirmationDTO.userId <= 0 || string.IsNullOrEmpty(confirmationDTO.token))
+    //         return new BadRequestObjectResult(new { Message = "Token de verificación no válido" });
+
+    //     var user = await _userManager.FindByIdAsync(confirmationDTO.userId.ToString());
+    //     if (user == null)
+    //         return new NotFoundObjectResult(new { Message = "Usuario no encontrado" });
+
+    //     var result = await _userManager.ConfirmEmailAsync(user, confirmationDTO.token);
+    //     if (!result.Succeeded)
+    //         return new ObjectResult(new { Message = "Error al confirmar el correo", Errors = result.Errors })
+    //         {
+    //             StatusCode = StatusCodes.Status500InternalServerError
+    //         };
+
+    //     return new OkObjectResult(new { Message = "Correo confirmado exitosamente" });
+    // }
     public async Task<IEnumerable<UserDTO>> GetAll()
     {
         var users = await _userManager.Users.ToListAsync();
@@ -98,6 +122,5 @@ public class AccountDbService : IAccountService
         };
     }
 
-
-
 }
+

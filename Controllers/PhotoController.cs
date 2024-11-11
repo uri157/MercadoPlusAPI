@@ -13,50 +13,34 @@ public class PhotoController : ControllerBase
         _photoService = photoService;
     }
 
-    // Obtener todas las fotos
-    [Authorize]
-    [HttpGet]
-    public ActionResult<List<PhotoDTO>> GetAllPhotos()
-    {
-        return Ok(_photoService.GetAll());
-    }
+    // // Obtener todas las fotos
+    // [Authorize]
+    // [HttpGet]
+    // public ActionResult<List<PhotoDTO>> GetAllPhotos()
+    // {
+    //     return Ok(_photoService.GetAll());
+    // }
 
     // Obtener una foto por ID
+    [AllowAnonymous]
     [HttpGet("{id}")]
-    public IActionResult GetById(int id)
+    public PhotoDTO GetById(int id)
     {
-        var photo = _photoService.GetById(id);
-        if (photo == null)
-        {
-            return NotFound("Photo not found");
-        }
-
-        return Ok(photo);  // Retorna la cadena Base64
+        return _photoService.GetById(id);  // Retorna la cadena Base64
     }
 
     // Subir una nueva foto
+    [Authorize]
     [HttpPost]
-    public ActionResult<PhotoDTO> NewPhoto([FromBody] PhotoPostPutDTO photoDto)
+    public PhotoDTO NewPhoto([FromBody] PhotoPostPutDTO photoDto)
     {
-        if (string.IsNullOrEmpty(photoDto.ImageData))
-        {
-            return BadRequest("Invalid image data.");
-        }
-
-        var newPhoto = _photoService.Create(photoDto);
-        return CreatedAtAction(nameof(GetById), new { id = newPhoto.Id }, newPhoto);
+        return _photoService.Create(photoDto);
     }
 
     // Eliminar una foto por ID
     [HttpDelete("{id}")]
     public ActionResult Delete(int id)
-    {
-        var photo = _photoService.GetById(id);
-        if (photo == null)
-        {
-            return NotFound("Photo not found");
-        }
-
+    { 
         _photoService.Delete(id);
         return NoContent();
     }

@@ -26,10 +26,7 @@ public class ColorController : ControllerBase
     public ActionResult<ColorDTO> GetById(int id)
     {
         var Color = _ColorService.GetById(id);
-        if (Color == null)
-        {
-            return NotFound("Color not found");
-        }
+        
         return Ok(Color);
     }
 
@@ -62,12 +59,6 @@ public class ColorController : ControllerBase
     [HttpDelete("{id}")]
     public ActionResult Delete(int id)
     {
-        var Color = _ColorService.GetById(id);
-        if (Color == null)
-        {
-            return NotFound("Color not found");
-        }
-
         _ColorService.Delete(id);
         return NoContent();
     }

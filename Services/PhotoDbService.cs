@@ -14,22 +14,25 @@ public class PhotoDbService : IPhotoService
         _environment = environment;
     }
 
-    // Obtener todas las fotos
-    public List<PhotoDTO> GetAll()
-    {
-        var photos = _context.Photos.ToList();
-        return photos.Select(p => new PhotoDTO
-        {
-            Id = p.Id,
-            ImageData = p.ImageData
-        }).ToList();
-    }
+    // // Obtener todas las fotos
+    // public List<PhotoDTO> GetAll()
+    // {
+    //     var photos = _context.Photos.ToList();
+    //     return photos.Select(p => new PhotoDTO
+    //     {
+    //         Id = p.Id,
+    //         ImageData = p.ImageData
+    //     }).ToList();
+    // }
 
     // Obtener una foto por ID
     public PhotoDTO GetById(int id)
     {
         var photo = _context.Photos.Find(id);
-        if (photo == null) return null;
+        if (photo == null)
+        {
+            throw new Exception("Photo not found");
+        }
 
         return new PhotoDTO
         {
@@ -41,6 +44,10 @@ public class PhotoDbService : IPhotoService
     // Crear una nueva foto
     public PhotoDTO Create(PhotoPostPutDTO photoDto)
     {
+        if (string.IsNullOrEmpty(photoDto.ImageData))
+        {
+            throw new Exception("Invalid Image Data");
+        }
         var photo = new Photo
         {
             ImageData = photoDto.ImageData
@@ -59,13 +66,9 @@ public class PhotoDbService : IPhotoService
     public void Delete(int id)
     {
         var photo = _context.Photos.Find(id);
-        if (photo == null) return;
-
-        // Eliminar el archivo del sistema de archivos
-        var filePath = Path.Combine(_environment.WebRootPath, "uploads", photo.ImageData);
-        if (File.Exists(filePath))
+        if (photo == null)
         {
-            File.Delete(filePath);
+            throw new Exception("Photo Not Found");
         }
 
         // Eliminar el registro de la base de datos
@@ -77,9 +80,13 @@ public class PhotoDbService : IPhotoService
     public PhotoDTO Update(int id, PhotoDTO photoDto)
     {
         var photo = _context.Photos.Find(id);
-        if (photo == null) return null;
+        if (photo == null)
+        {
+            throw new Exception("Photo Not Found");
+        }
 
         photo.ImageData = photoDto.ImageData;
+
         _context.SaveChanges();
 
         return new PhotoDTO

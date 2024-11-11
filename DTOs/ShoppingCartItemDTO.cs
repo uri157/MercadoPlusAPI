@@ -14,3 +14,10 @@ public class ShoppingCartItemDTO
     public string Title {get;set;}
     public decimal Price {get;set;}
 }
+
+public class ShoppingCartItemPostDTO
+{
+    public int PublicationId { get; set; } // Clave foránea a Publication
+    [Required]
+    public int Quantity { get; set; } // Cantidad de la publicación en el carrito
+}

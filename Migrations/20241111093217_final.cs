@@ -482,7 +482,7 @@ namespace api_biblioteca.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdUser = table.Column<int>(type: "int", nullable: false),
                     IdPublication = table.Column<int>(type: "int", nullable: false),
-                    Question = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Question = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Answer = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>

@@ -16,16 +16,11 @@ public class CategoryController : ControllerBase
     // Obtener todas las categorías
     [AllowAnonymous]
     [HttpGet]
-    public ActionResult<List<CategoryGetAllDTO>> GetAllCategories()
+    public ActionResult<List<CategoryDTO>> GetAllCategories()
     {
         var categories = _categoryService.GetAll();
-        var categoryDtos = categories.Select(c => new CategoryDTO
-        {
-            Id = c.Id,
-            Name = c.Name
-        }).ToList();
 
-        return Ok(categoryDtos);
+        return Ok(categories);
     }
 
     // Obtener una categoría por ID
@@ -34,18 +29,8 @@ public class CategoryController : ControllerBase
     public ActionResult<CategoryDTO> GetById(int id)
     {
         var category = _categoryService.GetById(id);
-        if (category == null)
-        {
-            return NotFound("Category not found");
-        }
 
-        var categoryDto = new CategoryDTO
-        {
-            Id = category.Id,
-            Name = category.Name
-        };
-
-        return Ok(categoryDto);
+        return Ok(category);
     }
 
     // Crear una nueva categoría
@@ -62,12 +47,6 @@ public class CategoryController : ControllerBase
     [HttpDelete("{id}")]
     public ActionResult Delete(int id)
     {
-        var category = _categoryService.GetById(id);
-        if (category == null)
-        {
-            return NotFound("Category not found");
-        }
-
         _categoryService.Delete(id);
         return NoContent();
     }
@@ -75,30 +54,11 @@ public class CategoryController : ControllerBase
     // Actualizar una categoría por ID
     [Authorize(Roles = "admin")]
     [HttpPut("{id}")]
-    public ActionResult<CategoryDTO> UpdateCategory(int id, CategoryPutDTO categoryDto)
+    public ActionResult<CategoryDTO> UpdateCategory(CategoryDTO categoryDto)
     {
-        
 
-        // Mapeo de CategoryDTO a Category
-        var categoryToUpdate = new Category
-        {
-            Id = id,
-            Name = categoryDto.Name
-        };
+        var updatedCategory = _categoryService.Update(categoryDto);
 
-        var updatedCategory = _categoryService.Update(id, categoryToUpdate);
-        if (updatedCategory == null)
-        {
-            return NotFound("Category not found");
-        }
-
-        // Mapeo del resultado actualizado de nuevo a CategoryDTO para la respuesta
-        var updatedCategoryDto = new CategoryDTO
-        {
-            Id = updatedCategory.Id,
-            Name = updatedCategory.Name
-        };
-
-        return CreatedAtAction(nameof(GetById), new { id = updatedCategoryDto.Id }, updatedCategoryDto);
+        return CreatedAtAction(nameof(GetById), new { id = updatedCategory }, updatedCategory);
     }
 }

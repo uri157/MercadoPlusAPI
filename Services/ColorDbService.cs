@@ -33,11 +33,14 @@ public class ColorDbService : IColorService
     public void Delete(int id)
     {
         var Color = _context.Colors.Find(id);
-        if (Color != null)
+
+        if (Color == null)
         {
-            _context.Colors.Remove(Color);
-            _context.SaveChanges(); // Guardar los cambios
+            throw new Exception($"Color with ID '{id}' not found");
         }
+
+        _context.Colors.Remove(Color);
+        _context.SaveChanges(); // Guardar los cambios
     }
 
     // Obtener todos los estados de publicación
@@ -57,35 +60,39 @@ public class ColorDbService : IColorService
     public ColorDTO? GetById(int id)
     {
         var Color = _context.Colors.Find(id);
-        if (Color != null)
+        if (Color == null)
         {
-            return new ColorDTO
-            {
-                Id = Color.Id,
-                Name = Color.Name,
-            };
+            throw new Exception($"Color with ID '{id}' not found");        
         }
-        return null;
+
+        return new ColorDTO
+        {
+            Id = Color.Id,
+            Name = Color.Name,
+        };
     }
 
     // Actualizar un estado de publicación existente
     public ColorDTO? Update(int id, ColorPostPutDTO ColorDto)
     {
         var existingColor = _context.Colors.Find(id);
-        if (existingColor != null)
+
+        if (existingColor == null)
         {
-            existingColor.Name = ColorDto.Name;
-
-            _context.Entry(existingColor).State = EntityState.Modified;
-            _context.SaveChanges(); // Guardar cambios
-
-            return new ColorDTO
-            {
-                Id = existingColor.Id,
-                Name = existingColor.Name,
-            };
+            throw new Exception($"Color with ID '{id}' not found");     
         }
 
-        return null;
+        
+        existingColor.Name = ColorDto.Name;
+
+        _context.Entry(existingColor).State = EntityState.Modified;
+        _context.SaveChanges(); // Guardar cambios
+
+        return new ColorDTO
+        {
+            Id = existingColor.Id,
+            Name = existingColor.Name,
+        };
+        
     }
 }

@@ -7,7 +7,7 @@ public interface IShoppingCartService
     Task<ShoppingCartDTO> GetCartByUserId(int userId);
 
     // Agregar una publicación al carrito del usuario
-    Task<ShoppingCartDTO> AddToCart(int userId, int publicationId, int quantity);
+    Task<ShoppingCartDTO> AddToCart(int userId, ShoppingCartItemPostDTO shoppingCartItemDTO);
 
     // Remover un producto del carrito
     Task<bool> RemoveFromCart(int userId, int publicationId);

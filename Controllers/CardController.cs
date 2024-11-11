@@ -22,7 +22,7 @@ public class CardController : ControllerBase
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
         
         // Obtener solo las tarjetas del usuario autenticado
-        return Ok(_cardService.GetByUserId(userId));
+        return Ok(_cardService.GetAllUserCardsByUserId(userId));
     }
 
      // Obtener una tarjeta por ID si pertenece al usuario autenticado
@@ -31,38 +31,32 @@ public class CardController : ControllerBase
     public ActionResult<Card> GetById(int cardId)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-        var card = _cardService.GetById(cardId);
+        var cardDto = _cardService.GetUserCardById(cardId, userId);
 
-        if (card == null || card.UserId != userId)
+        if (cardDto == null)
         {
             return NotFound("Card not found or access denied");
         }
 
-        return Ok(card);
+        return Ok(cardDto);
     }
 
-    // Crear una nueva tarjeta para el usuario autenticado
     [Authorize]
     [HttpPost]
     public ActionResult<CardDTO> NewCard(CardPutPostDTO cardDto)
     {
         try
         {
-            // Verificar que el usuario autenticado tenga un ID válido
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
+            // Obtener el ID del usuario autenticado
+            int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            if (userId == null)
             {
                 return Unauthorized("No se encontró el identificador del usuario.");
             }
 
-            if (!int.TryParse(userIdClaim, out var userId))
-            {
-                return BadRequest("El identificador de usuario es inválido.");
-            }
-
             // Crear la tarjeta
             var newCard = _cardService.Create(cardDto, userId);
-            return newCard;
+            return Ok(newCard);
         }
         catch (ArgumentException ex)
         {
@@ -76,13 +70,55 @@ public class CardController : ControllerBase
         }
         catch (Exception ex)
         {
-            // Log del error (opcional)
-            // _logger.LogError(ex, "Error no previsto en NewCard");
-
             // Manejar cualquier otro error no previsto
             return StatusCode(500, new { Message = "Ocurrió un error interno en el servidor.", Details = ex.Message });
         }
     }
+
+
+
+    // // Crear una nueva tarjeta para el usuario autenticado
+    // [Authorize]
+    // [HttpPost]
+    // public ActionResult<CardDTO> NewCard(CardPutPostDTO cardDto)
+    // {
+    //     try
+    //     {
+    //         // Verificar que el usuario autenticado tenga un ID válido
+    //         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    //         if (userIdClaim == null)
+    //         {
+    //             return Unauthorized("No se encontró el identificador del usuario.");
+    //         }
+
+    //         if (!int.TryParse(userIdClaim, out var userId))
+    //         {
+    //             return BadRequest("El identificador de usuario es inválido.");
+    //         }
+
+    //         // Crear la tarjeta
+    //         var newCard = _cardService.Create(cardDto, userId);
+    //         return newCard;
+    //     }
+    //     catch (ArgumentException ex)
+    //     {
+    //         // Manejar errores específicos del servicio (ej., tipo de tarjeta inexistente)
+    //         return BadRequest(new { Message = "Error en los datos de la tarjeta.", Details = ex.Message });
+    //     }
+    //     catch (InvalidOperationException ex)
+    //     {
+    //         var errorMessage = ex.InnerException?.Message ?? ex.Message;
+    //         return Conflict(new { Message = "Conflicto al crear la tarjeta.", Details = errorMessage });
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         // Log del error (opcional)
+    //         // _logger.LogError(ex, "Error no previsto en NewCard");
+
+    //         // Manejar cualquier otro error no previsto
+    //         return StatusCode(500, new { Message = "Ocurrió un error interno en el servidor.", Details = ex.Message });
+    //     }
+    // }
 
 
     // Eliminar una tarjeta por ID si pertenece al usuario autenticado
@@ -91,7 +127,8 @@ public class CardController : ControllerBase
     public ActionResult Delete(int cardId)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-        var card = _cardService.GetById(cardId);
+
+        var card = _cardService.GetUserCardById(userId,cardId);
 
         if (card == null || card.UserId != userId)
         {
@@ -108,7 +145,8 @@ public class CardController : ControllerBase
     public ActionResult<Card> UpdateCard(int cardId, CardPutPostDTO updatedCard)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-        var card = _cardService.GetById(cardId);
+
+        var card = _cardService.GetUserCardById(userId, cardId);
 
         if (card == null || card.UserId != userId)
         {
@@ -116,6 +154,7 @@ public class CardController : ControllerBase
         }
 
         var updated = _cardService.Update(cardId, updatedCard, userId);
+
         return CreatedAtAction(nameof(GetById), new { id = updated.Id }, updated);
     }
 

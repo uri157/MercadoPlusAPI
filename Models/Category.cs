@@ -9,7 +9,7 @@ public class Category
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]  // Esto indica que el ID será autogenerado
     public int Id { get; set; }
 
-    public string? Name { get; set; } // Nombre de la categoría
+    public string Name { get; set; } // Nombre de la categoría
 
     // Propiedad de navegación: Una lista de publicaciones relacionadas con esta categoría
     public ICollection<Publication> Publications { get; set; }

@@ -10,7 +10,7 @@ public class CardTypeDbService : ICardTypeService
     }
 
     // Crear un nuevo tipo de tarjeta
-    public CardType Create(CardTypePutDTO cardTypeDto)
+    public CardTypeDTO Create(CardTypePutDTO cardTypeDto)
     {
         CardType cardType = new()
         {
@@ -20,7 +20,12 @@ public class CardTypeDbService : ICardTypeService
 
         _context.CardTypes.Add(cardType);
         _context.SaveChanges(); // Guardar cambios en la base de datos
-        return cardType;
+        return new CardTypeDTO
+        {
+            Id = cardType.Id,
+            TypeName = cardType.TypeName,
+            Description = cardType.Description
+        };
     }
 
     // Eliminar un tipo de tarjeta por su ID
@@ -35,19 +40,33 @@ public class CardTypeDbService : ICardTypeService
     }
 
     // Obtener todos los tipos de tarjetas
-    public IEnumerable<CardType> GetAll()
+    public IEnumerable<CardTypeDTO> GetAll()
     {
-        return _context.CardTypes.ToList();
+        return _context.CardTypes
+            .Select(ct => new CardTypeDTO
+            {
+                Id = ct.Id,
+                TypeName = ct.TypeName,
+                Description = ct.Description
+            })
+            .ToList();
     }
 
     // Obtener un tipo de tarjeta por su ID
     public CardType? GetById(int id)
     {
-        return _context.CardTypes.Find(id);
+        var cardType = _context.CardTypes.Find(id);
+
+        if (cardType == null)
+        {
+            throw new ArgumentException($"CardType with ID '{id}' not found");
+        }
+
+        return cardType;
     }
 
     // Actualizar un tipo de tarjeta existente
-    public CardType? Update(int id, CardTypePutDTO cardTypeDto)
+    public CardTypeDTO? Update(int id, CardTypePutDTO cardTypeDto)
     {
         var existingCardType = _context.CardTypes.Find(id);
         if (existingCardType != null)
@@ -57,7 +76,12 @@ public class CardTypeDbService : ICardTypeService
 
             _context.Entry(existingCardType).State = EntityState.Modified;
             _context.SaveChanges(); // Guardar cambios
-            return existingCardType;
+            return new CardTypeDTO
+            {
+                Id = existingCardType.Id,
+                TypeName = existingCardType.TypeName,
+                Description = existingCardType.Description
+            };
         }
 
         return null;

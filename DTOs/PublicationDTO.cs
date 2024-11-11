@@ -75,7 +75,8 @@ public class PublicationPostDTO
 
 public class PublicationPutDTO
 {
-    
+    [Required(ErrorMessage = "El campo Id es requerido.")]
+    public int Id { get; set; }
     public int? IdCategoria { get; set; }
 
     [MaxLength(500, ErrorMessage = "La descripción no debe exceder los 500 caracteres.")]

@@ -18,7 +18,7 @@ public class Publication
 
     public decimal Price { get; set; } // Precio
 
-    public string? Title { get; set; } // Título de la publicación
+    public string Title { get; set; } // Título de la publicación
 
     public int IdPublicationState { get; set; } // Clave foránea al estado de la publicación
 

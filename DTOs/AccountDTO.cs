@@ -92,3 +92,10 @@ public class UserPutDTO
 
     public string? Address { get; set; } // Este campo también es opcional
 }
+
+public class ConfirmEmailDTO{
+    [Required]
+    public int userId{get;set;}
+    [Required]
+    public string token{get;set;}
+}

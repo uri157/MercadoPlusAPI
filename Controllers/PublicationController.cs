@@ -34,20 +34,9 @@ public class PublicationController : ControllerBase
     [AllowAnonymous]
     //[HttpGet]
     [HttpGet("by-category")]
-    public ActionResult<IEnumerable<PublicationDTO>> GetPublicationsByCategoryName(string categoryName)
+    public IEnumerable<PublicationDTO> GetPublicationsByCategoryName(string categoryName)
     {
-        IEnumerable<PublicationDTO> publications;
-
-        if (!string.IsNullOrEmpty(categoryName))
-        {
-            publications = _publicationService.GetByCategoryName(categoryName);
-        }
-        else
-        {
-            publications = _publicationService.GetAll();
-        }
-
-        return Ok(publications);
+        return _publicationService.GetByCategoryName(categoryName);
     }
 
 
@@ -57,11 +46,6 @@ public class PublicationController : ControllerBase
     public ActionResult<PublicationDTO> GetById(int id)
     {
         var publication = _publicationService.GetById(id);
-        if (publication == null)
-        {
-            return NotFound("Publication not found");
-        }
-
 
         // Verificar si el usuario está autenticado
         if (User.Identity.IsAuthenticated)
@@ -109,28 +93,17 @@ public class PublicationController : ControllerBase
     // Actualizar una publicación por ID
     [Authorize]
     [HttpPut("{id}")]
-    public ActionResult<PublicationDTO> UpdatePublication(int id, PublicationPutDTO publicationToUpdate)
+    public ActionResult<PublicationDTO> UpdatePublication(PublicationPutDTO publicationToUpdate)
     {
-        
-        var updatedPublication = _publicationService.Update(id, publicationToUpdate);
-        if (updatedPublication == null)
-        {
-            return NotFound("Publication not found");
-        }
-
+        var updatedPublication = _publicationService.Update(publicationToUpdate);
         return Ok(updatedPublication);
     }
 
     // Eliminar una publicación por ID
+    [Authorize(Roles = "admin")]
     [HttpDelete("{id}")]
     public ActionResult Delete(int id)
     {
-        var publication = _publicationService.GetById(id);
-        if (publication == null)
-        {
-            return NotFound("Publication not found");
-        }
-
         _publicationService.Delete(id);
         return NoContent();
     }

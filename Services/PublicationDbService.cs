@@ -54,9 +54,16 @@ public class PublicationDbService : IPublicationService
     public PublicationDTO? GetById(int id)
     {
         Publication pub = _context.Publications.Find(id);
+
+        if (pub == null)
+        {
+            throw new Exception("Publication not found");
+        }
+
         var associatedPhotos = _photoPublicationService.GetPhotosByPublicationId(pub.Id);
         return new PublicationDTO
         {
+            Id = pub.Id,
             IdUsuario = pub.UserId,
             IdCategoria = pub.IdCategoria,
             Description = pub.Description,
@@ -83,7 +90,9 @@ public class PublicationDbService : IPublicationService
                             .FirstOrDefault();
 
         // Si no existe la categoría, retorna una lista vacía
-        if (categoryId == 0) return new List<PublicationDTO>();
+        if (categoryId == null) {
+            throw new Exception("Category not found");
+        }
 
         // Obtener todas las publicaciones de esa categoría
         var publications = _context.Publications
@@ -97,6 +106,9 @@ public class PublicationDbService : IPublicationService
 
             return new PublicationDTO
             {
+                Id = p.Id,
+                IdUsuario = p.UserId,
+                IdCategoria = p.IdCategoria,
                 Price = p.Price,
                 Title = p.Title,
                 IdPublicationState = p.IdPublicationState,
@@ -203,12 +215,12 @@ public class PublicationDbService : IPublicationService
     }
 
     // Actualizar una publicación
-    public PublicationDTO? Update(int id, PublicationPutDTO publicationToUpdate)
+    public PublicationDTO? Update(PublicationPutDTO publicationToUpdate)
     {
-        var existingPublication = _context.Publications.Find(id);
+        var existingPublication = _context.Publications.Find(publicationToUpdate.Id);
         if (existingPublication == null)
         {
-            return null;
+            throw new Exception("Failed to save the publication.");        
         }
 
         // Actualizamos los campos que podrían haber cambiado solo si no son nulos
@@ -249,12 +261,12 @@ public class PublicationDbService : IPublicationService
         _context.SaveChanges();
 
         // Obtener las fotos asociadas a la publicación
-        var associatedPhotos = _photoPublicationService.GetPhotosByPublicationId(id);
+        var associatedPhotos = _photoPublicationService.GetPhotosByPublicationId(publicationToUpdate.Id);
 
         // Retornar el DTO con las fotos
         return new PublicationDTO
         {
-            Id = id,
+            Id = publicationToUpdate.Id,
             IdUsuario = existingPublication.UserId,
             IdCategoria = existingPublication.IdCategoria,
             Description = existingPublication.Description,
@@ -276,10 +288,11 @@ public class PublicationDbService : IPublicationService
     public void Delete(int id)
     {
         var publication = _context.Publications.Find(id);
-        if (publication != null)
+        if (publication == null)
         {
-            _context.Publications.Remove(publication);
-            _context.SaveChanges();
+            throw new Exception("Failed to save the publication.");        
         }
+        _context.Publications.Remove(publication);
+        _context.SaveChanges();
     }
 }

@@ -14,10 +14,11 @@ public class AccountController : ControllerBase
     private readonly IAccountService _accountService;
     private readonly UserManager<User> _userManager;
     private readonly RoleManager<IdentityRole<int>> _roleManager;
+    private readonly IMailService _mailService;
     private readonly SignInManager<User> _signInManager;
     private readonly IConfiguration _configuration;
     // private readonly IRecaptchaService _recaptchaService;
-    private readonly IMailService _mailService;
+    
 
     public AccountController(
         UserManager<User> userManager,
@@ -25,16 +26,17 @@ public class AccountController : ControllerBase
         RoleManager<IdentityRole<int>> roleManager,
         SignInManager<User> signInManager,
         // IRecaptchaService recaptchaService,
-        IMailService mailService,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IMailService mailService
+        )
     {
         _userManager = userManager;
         // _recaptchaService = recaptchaService;
-        _mailService = mailService;
         _accountService = accountService;
         _roleManager = roleManager;
         _signInManager = signInManager;
         _configuration = configuration;
+        _mailService = mailService;
         // _recaptchaService = recaptchaService;
     }
 
@@ -100,6 +102,7 @@ public class AccountController : ControllerBase
 
         return Ok(new { Message = "Usuario creado satisfactoriamente, por favor verifique la bandeja de entrada de su correo para validación" });
     }
+   
 
     [AllowAnonymous]
     [HttpGet("confirmemail")]
@@ -137,10 +140,6 @@ public class AccountController : ControllerBase
 
             var updatedUser = await _accountService.Update(currentUserId, model);
 
-            if (updatedUser == null)
-            {
-                return NotFound(new { Message = "Usuario no encontrado" });
-            }
 
             return Ok(new
             {

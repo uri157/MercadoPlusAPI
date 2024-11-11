@@ -11,7 +11,7 @@ public class PublicationStateDTO
     public string Description { get; set; }
 }
 
-public class PublicationStatePostPutDTO
+public class PublicationStatePostDTO
 {
     [Required(ErrorMessage = "El campo Nombre es requerido.")]
     public string Name { get; set; }
@@ -19,3 +19,4 @@ public class PublicationStatePostPutDTO
     [Required(ErrorMessage = "El campo Descripción es requerido.")]
     public string Description { get; set; }
 }
+

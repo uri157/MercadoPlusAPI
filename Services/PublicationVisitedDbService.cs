@@ -4,7 +4,9 @@ public class PublicationVisitedDbService : IPublicationVisitedService
 {
     private readonly DbContext _context; // Cambia YourDbContext por el nombre de tu DbContext
 
-    public PublicationVisitedDbService(DbContext context)
+
+    public PublicationVisitedDbService
+    (DbContext context)
     {
         _context = context;
     }
@@ -58,6 +60,30 @@ public class PublicationVisitedDbService : IPublicationVisitedService
                 IdPublication = pv.IdPublication
             })
             .ToList();
+    }
+
+    public string getLatestCategoryVisitedByUser(int userId)
+    {
+        var latestVisited = _context.PublicationVisited
+                                    .Where(pv => pv.IdUser == userId)
+                                    .OrderByDescending(pv => pv.Id) // Ordenar por ID de manera descendente
+                                    .FirstOrDefault(); // Obtener solo la última visita
+
+        if (latestVisited == null)
+        {
+            throw new Exception("Empty History"); // Si no se encuentra ninguna visita, devolver null o un valor por defecto
+        }
+
+        // Realizar el JOIN para obtener el nombre de la categoría de la publicación visitada
+        var categoryName = _context.Publications
+                                .Where(p => p.Id == latestVisited.IdPublication)
+                                .Join(_context.Categories, 
+                                        p => p.IdCategoria, 
+                                        c => c.Id, 
+                                        (p, c) => c.Name) // Seleccionar el nombre de la categoría
+                                .FirstOrDefault(); // Obtener el nombre de la categoría de la publicación
+
+        return categoryName;
     }
 }
 

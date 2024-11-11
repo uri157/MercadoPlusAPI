@@ -9,27 +9,32 @@ using Microsoft.AspNetCore.Authorization;
 public class TransactionController : ControllerBase
 {
     private readonly ITransactionService _transactionService;
-    private readonly ICardService _cardService;
     private readonly INotificationService _notificationService;
     private readonly IPublicationService _publicationService;
+    private readonly ICardService _cardService;
 
-
-    public TransactionController(ITransactionService transactionService, ICardService cardService, INotificationService notificationService, IPublicationService publicationService)
+    public TransactionController
+    (
+        ITransactionService transactionService, 
+        INotificationService notificationService,
+        IPublicationService publicationService, 
+        ICardService cardService)
     {
         _transactionService = transactionService;
-        _cardService = cardService;
         _notificationService = notificationService;
+        _cardService = cardService;
         _publicationService = publicationService;
+
     }
 
-    // Obtener todas las transacciones
-    [Authorize]
-    [HttpGet]
-    public async Task<ActionResult<List<TransactionDTO>>> GetAll()
-    {
-        var transactions = await _transactionService.GetAll();
-        return Ok(transactions);
-    }
+    // // Obtener todas las transacciones
+    // [Authorize]
+    // [HttpGet]
+    // public async Task<ActionResult<List<TransactionDTO>>> GetAll()
+    // {
+    //     var transactions = await _transactionService.GetAll();
+    //     return Ok(transactions);
+    // }
 
     // Obtener una transacción por ID
     [Authorize]
@@ -37,10 +42,7 @@ public class TransactionController : ControllerBase
     public async Task<ActionResult<TransactionDTO>> GetById(int id)
     {
         var transaction = await _transactionService.GetById(id);
-        if (transaction == null)
-        {
-            return NotFound(); // Retorna 404 si no se encuentra
-        }
+        
         return Ok(transaction);
     }
 
@@ -50,38 +52,36 @@ public class TransactionController : ControllerBase
     public async Task<ActionResult<TransactionDTO>> Create([FromBody] TransactionPostDTO transactionPostDto)
     {
         // Se asume que el userId es obtenido del contexto del usuario autenticado
-        int UserId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-         // Verificar que la tarjeta existe y pertenece al usuario
-        var card = _cardService.GetById(transactionPostDto.IdCard);
+        // Verificar que la tarjeta existe y pertenece al usuario
+        var card = _cardService.GetUserCardById(transactionPostDto.IdCard, userId);
 
-        if (card == null || card.UserId != UserId)
+        if (card == null || card.UserId != userId)
         {
-            throw new UnauthorizedAccessException("La tarjeta no pertenece al usuario autenticado.");
+            throw new UnauthorizedAccessException("La tarjeta no existe o no pertenece al usuario autenticado.");
         }
 
+        
+        var transaction = await _transactionService.Create(userId, transactionPostDto);
+
         //Enviar notificacion al comprador
-        _notificationService.Create(new NotificationPutPostDTO
+        _notificationService.Create(new NotificationPostDTO
             {
                 Text = "Felicidades por tu nueva compra!",
-                userId = UserId,
+                userId = userId,
                 Readed = false
             }
         );
 
         //Enviar notificacion al vendedor
-        _notificationService.Create(new NotificationPutPostDTO
+        _notificationService.Create(new NotificationPostDTO
             {
                 Text = "Felicidades por tu nueva venta!",
                 userId = _publicationService.GetById(transactionPostDto.IdPublication).IdUsuario,
                 Readed = false
             }
         );
-
-
-        var transaction = await _transactionService.Create(UserId, transactionPostDto);
-
-
 
         return CreatedAtAction(nameof(GetById), new { id = transaction.Id }, transaction);
     }
@@ -95,23 +95,17 @@ public class TransactionController : ControllerBase
         int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
         var result = await _transactionService.Update(id, userId, transactionPutDto);
-        if (!result)
-        {
-            return NotFound(); // Retorna 404 si no se encuentra
-        }
+      
         return NoContent(); // Retorna 204 si la actualización es exitosa
     }
 
     // Eliminar una transacción por ID
-    [Authorize]
+    [Authorize(Roles = "admin")]
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
         var result = await _transactionService.Delete(id);
-        if (!result)
-        {
-            return NotFound(); // Retorna 404 si no se encuentra
-        }
+        
         return NoContent(); // Retorna 204 si la eliminación es exitosa
     }
 

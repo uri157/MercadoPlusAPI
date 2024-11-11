@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace api_biblioteca.Migrations
 {
     [DbContext(typeof(DbContext))]
-    [Migration("20241109195836_final")]
+    [Migration("20241111093217_final")]
     partial class final
     {
         /// <inheritdoc />
@@ -667,6 +667,7 @@ namespace api_biblioteca.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Question")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

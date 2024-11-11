@@ -11,7 +11,7 @@ public class ShoppingCartDTO
 }
 
 
-public class ShoppingCartPostDTO
+public class ShoppingCartAddArticleDTO
 {
     public int IdPublication { get; set; }
     public int Quantity {get;set;}

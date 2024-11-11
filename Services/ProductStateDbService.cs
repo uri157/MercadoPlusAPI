@@ -10,7 +10,7 @@ public class ProductStateDbService : IProductStateService
     }
 
     // Crear un nuevo estado de producto
-    public ProductStateDTO Create(ProductStatePostPutDTO productStateDto)
+    public ProductStateDTO Create(ProductStatePostDTO productStateDto)
     {
         ProductState productState = new()
         {
@@ -34,11 +34,12 @@ public class ProductStateDbService : IProductStateService
     public void Delete(int id)
     {
         var productState = _context.ProductStates.Find(id);
-        if (productState != null)
+        if (productState == null)
         {
-            _context.ProductStates.Remove(productState);
-            _context.SaveChanges(); // Guardar los cambios
+            throw new Exception("No se encontro la notificacion.");
         }
+        _context.ProductStates.Remove(productState);
+        _context.SaveChanges(); // Guardar los cambios
     }
 
     // Obtener todos los estados de producto
@@ -58,38 +59,38 @@ public class ProductStateDbService : IProductStateService
     public ProductStateDTO? GetById(int id)
     {
         var productState = _context.ProductStates.Find(id);
-        if (productState != null)
+        if (productState == null)
         {
-            return new ProductStateDTO
-            {
-                Id = productState.Id,
-                Name = productState.Name,
-                Description = productState.Description
-            };
+            throw new Exception("No se encontro el product state.");
         }
-        return null;
+    
+        return new ProductStateDTO
+        {
+            Id = productState.Id,
+            Name = productState.Name,
+            Description = productState.Description
+        };
     }
 
     // Actualizar un estado de producto existente
-    public ProductStateDTO? Update(int id, ProductStatePostPutDTO productStateDto)
+    public ProductStateDTO? Update(ProductStateDTO productStateDto)
     {
-        var existingProductState = _context.ProductStates.Find(id);
-        if (existingProductState != null)
+        var existingProductState = _context.ProductStates.Find(productStateDto.Id);
+        if (existingProductState == null)
         {
-            existingProductState.Name = productStateDto.Name;
-            existingProductState.Description = productStateDto.Description;
-
-            _context.Entry(existingProductState).State = EntityState.Modified;
-            _context.SaveChanges(); // Guardar cambios
-
-            return new ProductStateDTO
-            {
-                Id = existingProductState.Id,
-                Name = existingProductState.Name,
-                Description = existingProductState.Description
-            };
+            throw new Exception("No se encontro el product state.");
         }
+        existingProductState.Name = productStateDto.Name;
+        existingProductState.Description = productStateDto.Description;
 
-        return null;
+        _context.Entry(existingProductState).State = EntityState.Modified;
+        _context.SaveChanges(); // Guardar cambios
+
+        return new ProductStateDTO
+        {
+            Id = existingProductState.Id,
+            Name = existingProductState.Name,
+            Description = existingProductState.Description
+        };
     }
 }

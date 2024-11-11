@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -27,14 +28,19 @@ public class PublicationVisitedController : ControllerBase
     [HttpPost]
     public IActionResult AddVisit(int publicationId)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
 
         int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
         _publicationVisitedService.AddPublicationVisit(userId, publicationId);
         return Ok("Publication visit registered successfully.");
+    }
+
+    [Authorize]
+    [HttpGet("LatestCategoryVisited")]
+    public string getLatestCategoryVisitedByUser()
+    {
+        int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+        return _publicationVisitedService.getLatestCategoryVisitedByUser(userId);
     }
 }

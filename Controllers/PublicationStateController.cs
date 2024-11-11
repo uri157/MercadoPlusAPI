@@ -25,18 +25,13 @@ public class PublicationStateController : ControllerBase
     [HttpGet("{id}")]
     public ActionResult<PublicationStateDTO> GetById(int id)
     {
-        var publicationState = _publicationStateService.GetById(id);
-        if (publicationState == null)
-        {
-            return NotFound("Publication state not found");
-        }
-        return Ok(publicationState);
+        return _publicationStateService.GetById(id);
     }
 
     // Crear un nuevo estado de publicación
     [Authorize(Roles = "admin")]
     [HttpPost]
-    public ActionResult<PublicationStateDTO> NewPublicationState(PublicationStatePostPutDTO publicationStateDto)
+    public ActionResult<PublicationStateDTO> NewPublicationState(PublicationStatePostDTO publicationStateDto)
     {
         var newPublicationState = _publicationStateService.Create(publicationStateDto);
         return CreatedAtAction(nameof(GetById), new { id = newPublicationState.Id }, newPublicationState);
@@ -45,14 +40,10 @@ public class PublicationStateController : ControllerBase
     // Actualizar un estado de publicación por ID
     [Authorize(Roles = "admin")]
     [HttpPut("{id}")]
-    public ActionResult<PublicationStateDTO> UpdatePublicationState(int id, PublicationStatePostPutDTO publicationStateDto)
+    public ActionResult<PublicationStateDTO> UpdatePublicationState(PublicationStateDTO publicationStateDto)
     {
 
-        var updatedPublicationState = _publicationStateService.Update(id, publicationStateDto);
-        if (updatedPublicationState == null)
-        {
-            return NotFound("Publication state not found");
-        }
+        var updatedPublicationState = _publicationStateService.Update(publicationStateDto);
 
         return Ok(updatedPublicationState);
     }
@@ -62,12 +53,6 @@ public class PublicationStateController : ControllerBase
     [HttpDelete("{id}")]
     public ActionResult Delete(int id)
     {
-        var publicationState = _publicationStateService.GetById(id);
-        if (publicationState == null)
-        {
-            return NotFound("Publication state not found");
-        }
-
         _publicationStateService.Delete(id);
         return NoContent();
     }

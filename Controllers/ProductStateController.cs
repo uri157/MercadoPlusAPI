@@ -23,20 +23,15 @@ public class ProductStateController : ControllerBase
     // Obtener un estado de producto por ID
     [AllowAnonymous]
     [HttpGet("{id}")]
-    public ActionResult<ProductStateDTO> GetById(int id)
+    public ProductStateDTO GetById(int id)
     {
-        var productState = _productStateService.GetById(id);
-        if (productState == null)
-        {
-            return NotFound("Product state not found");
-        }
-        return Ok(productState);
+        return _productStateService.GetById(id);
     }
 
     // Crear un nuevo estado de producto
     [Authorize(Roles = "admin")]
     [HttpPost]
-    public ActionResult<ProductStateDTO> NewProductState(ProductStatePostPutDTO productStateDto)
+    public ActionResult<ProductStateDTO> NewProductState(ProductStatePostDTO productStateDto)
     {
         var newProductState = _productStateService.Create(productStateDto);
         return CreatedAtAction(nameof(GetById), new { id = newProductState.Id }, newProductState);
@@ -47,12 +42,6 @@ public class ProductStateController : ControllerBase
     [HttpDelete("{id}")]
     public ActionResult Delete(int id)
     {
-        var productState = _productStateService.GetById(id);
-        if (productState == null)
-        {
-            return NotFound("Product state not found");
-        }
-
         _productStateService.Delete(id);
         return NoContent();
     }
@@ -60,14 +49,9 @@ public class ProductStateController : ControllerBase
     // Actualizar un estado de producto por ID
     [Authorize(Roles = "admin")]
     [HttpPut("{id}")]
-    public ActionResult<ProductStateDTO> UpdateProductState(int id, ProductStatePostPutDTO productStateDto)
+    public ActionResult<ProductStateDTO> UpdateProductState(ProductStateDTO productStateDto)
     {
-        
-        var updatedProductState = _productStateService.Update(id, productStateDto);
-        if (updatedProductState == null)
-        {
-            return NotFound("Product state not found");
-        }
+        var updatedProductState = _productStateService.Update(productStateDto);
 
         return CreatedAtAction(nameof(GetById), new { id = updatedProductState.Id }, updatedProductState);
     }

@@ -14,7 +14,7 @@ public class WishedArticleController : ControllerBase
     }
 
     // Obtener todos los artículos deseados
-    //[Authorize]
+    [Authorize]
     [HttpGet]
     public ActionResult<IEnumerable<WishedArticleDTO>> GetAllWishedArticles()
     {
@@ -23,18 +23,16 @@ public class WishedArticleController : ControllerBase
     }
 
     // Obtener un artículo deseado por ID
+    [Authorize]
     [HttpGet("{id}")]
     public ActionResult<WishedArticleDTO> GetById(int id)
     {
         var wishedArticle = _wishedArticleService.GetById(id);
-        if (wishedArticle == null)
-        {
-            return NotFound("Wished article not found");
-        }
         return Ok(wishedArticle);
     }
 
     // Agregar un nuevo artículo a la lista de deseos
+    [Authorize]
     [HttpPost]
     public ActionResult<WishedArticleDTO> NewWishedArticle(WishedArticlePostPutDTO wishedArticleDto)
     {
@@ -47,28 +45,22 @@ public class WishedArticleController : ControllerBase
     }
 
     // Actualizar un artículo deseado existente
+    [Authorize]
     [HttpPut("{id}")]
     public ActionResult<WishedArticleDTO> UpdateWishedArticle(int id, WishedArticlePostPutDTO wishedArticleToUpdate)
     {
         int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         var updatedWishedArticle = _wishedArticleService.Update(id, userId, wishedArticleToUpdate);
-        if (updatedWishedArticle == null)
-        {
-            return NotFound("Wished article not found");
-        }
 
         return Ok(updatedWishedArticle);
     }
 
     // Eliminar un artículo deseado por ID
+    [Authorize]
     [HttpDelete("{id}")]
     public ActionResult DeleteWishedArticle(int id)
     {
         var wishedArticle = _wishedArticleService.GetById(id);
-        if (wishedArticle == null)
-        {
-            return NotFound("Wished article not found");
-        }
 
         _wishedArticleService.Delete(id);
         return NoContent();

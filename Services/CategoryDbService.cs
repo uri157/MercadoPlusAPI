@@ -26,36 +26,64 @@ public class CategoryDbService : ICategoryService
     public void Delete(int id)
     {
         var category = _context.Categories.Find(id);
-        if (category != null)
+
+        if (category == null)
         {
-            _context.Categories.Remove(category);
-            _context.SaveChanges(); // Guardar los cambios
+            throw new Exception($"Category with ID '{id}' not found");
         }
+       
+        _context.Categories.Remove(category);
+        _context.SaveChanges(); // Guardar los cambios
     }
 
     // Obtener todas las categorías
-    public IEnumerable<Category> GetAll()
+    public IEnumerable<CategoryDTO> GetAll()
     {
-        return _context.Categories;
+        return _context.Categories
+                   .Select(c => new CategoryDTO
+                   {
+                       Id = c.Id,
+                       Name = c.Name
+                   })
+                   .ToList(); // Convertir a lista
     }
 
     // Obtener una categoría por su ID
-    public Category? GetById(int id)
+    public CategoryDTO? GetById(int id)
     {
-        return _context.Categories.Find(id);
+        var category = _context.Categories.Find(id);
+    
+        // Verificar si la categoría fue encontrada
+        if (category == null)
+        {
+            throw new Exception($"Category with ID '{id}' not found");
+        }
+
+        // Mapear la entidad Category al DTO
+        return new CategoryDTO
+        {
+            Id = category.Id,
+            Name = category.Name
+        };
     }
 
     // Actualizar una categoría existente
-    public Category? Update(int id, Category categoryToUpdate)
+    public CategoryDTO? Update(CategoryDTO categoryDto)
     {
-        var existingCategory = _context.Categories.Find(id);
+
+        var existingCategory = _context.Categories.Find(categoryDto.Id);
+
         if (existingCategory != null)
         {
-            existingCategory.Name = categoryToUpdate.Name;
+            existingCategory.Name = categoryDto.Name;
 
             _context.Entry(existingCategory).State = EntityState.Modified;
             _context.SaveChanges(); // Guardar cambios
-            return existingCategory;
+            return new CategoryDTO
+            {
+                Id = existingCategory.Id,
+                Name = existingCategory.Name
+            };
         }
 
         return null;

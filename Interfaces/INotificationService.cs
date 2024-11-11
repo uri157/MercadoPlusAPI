@@ -1,8 +1,8 @@
 public interface INotificationService
 {
-    NotificationDTO Create(NotificationPutPostDTO notificationDto);
+    NotificationDTO Create(NotificationPostDTO notificationDto);
     void Delete(int id);
     IEnumerable<NotificationDTO> GetAllByUserId(int userId);
     NotificationDTO? GetById(int id);
-    NotificationDTO? Update(int id, NotificationPutPostDTO notificationToUpdate);
+    NotificationDTO? Update(NotificationPutDTO notificationToUpdate);
 }

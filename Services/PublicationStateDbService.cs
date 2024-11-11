@@ -12,7 +12,7 @@ public class PublicationStateDbService : IPublicationStateService
     }
 
     // Crear un nuevo estado de publicación
-    public PublicationStateDTO Create(PublicationStatePostPutDTO publicationStateDto)
+    public PublicationStateDTO Create(PublicationStatePostDTO publicationStateDto)
     {
         PublicationState publicationState = new()
         {
@@ -59,38 +59,37 @@ public class PublicationStateDbService : IPublicationStateService
     public PublicationStateDTO? GetById(int id)
     {
         var publicationState = _context.PublicationStates.Find(id);
-        if (publicationState != null)
+        if (publicationState == null)
         {
-            return new PublicationStateDTO
-            {
-                Id = publicationState.Id,
-                Name = publicationState.Name,
-                Description = publicationState.Description
-            };
+         throw new Exception("PublicationState not found");
         }
-        return null;
+        return new PublicationStateDTO
+        {
+            Id = publicationState.Id,
+            Name = publicationState.Name,
+            Description = publicationState.Description
+        };
     }
 
     // Actualizar un estado de publicación existente
-    public PublicationStateDTO? Update(int id, PublicationStatePostPutDTO publicationStateDto)
+    public PublicationStateDTO? Update(PublicationStateDTO publicationStateDto)
     {
-        var existingPublicationState = _context.PublicationStates.Find(id);
-        if (existingPublicationState != null)
+        var existingPublicationState = _context.PublicationStates.Find(publicationStateDto.Id);
+        if (existingPublicationState == null)
         {
-            existingPublicationState.Name = publicationStateDto.Name;
-            existingPublicationState.Description = publicationStateDto.Description;
-
-            _context.Entry(existingPublicationState).State = EntityState.Modified;
-            _context.SaveChanges(); // Guardar cambios
-
-            return new PublicationStateDTO
-            {
-                Id = existingPublicationState.Id,
-                Name = existingPublicationState.Name,
-                Description = existingPublicationState.Description
-            };
+         throw new Exception("PublicationState not found");
         }
+        existingPublicationState.Name = publicationStateDto.Name;
+        existingPublicationState.Description = publicationStateDto.Description;
 
-        return null;
-    }
+        _context.Entry(existingPublicationState).State = EntityState.Modified;
+        _context.SaveChanges(); // Guardar cambios
+
+        return new PublicationStateDTO
+        {
+            Id = existingPublicationState.Id,
+            Name = existingPublicationState.Name,
+            Description = existingPublicationState.Description
+        };
+        }
 }

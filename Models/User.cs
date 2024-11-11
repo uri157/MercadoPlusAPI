@@ -5,8 +5,8 @@ using System.Text.Json.Serialization;
 public class User : IdentityUser<int> // Usa int como el tipo de Id si lo prefieres
 {
     public int? ProfilePhotoId { get; set; } // IdFotoPerfil opcional
-    public string? FirstName { get; set; } // Nombre
-    public string? LastName { get; set; } // Apellido
+    public string FirstName { get; set; } // Nombre
+    public string LastName { get; set; } // Apellido
     public string? DNI { get; set; } // Documento de Identidad opcional
     public string? Address { get; set; } // Dirección opcional
 

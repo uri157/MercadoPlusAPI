@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,6 +80,9 @@ try
     builder.Services.AddScoped<IMailService, MailService>();
     // builder.Services.AddHttpClient<IRecaptchaService, RecaptchaService>();
     builder.Services.AddScoped<IPublicationService, PublicationDbService>();
+    builder.Services.AddScoped<IWishedArticleService, WishedArticleDbService>();
+
+
 
     // Configuración de Identity para autenticación y autorización
     builder.Services.AddDbContext<DbContext>(options =>

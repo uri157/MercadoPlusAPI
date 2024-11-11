@@ -664,6 +664,7 @@ namespace api_biblioteca.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Question")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

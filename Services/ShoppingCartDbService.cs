@@ -42,8 +42,13 @@ public class ShoppingCartDbService : IShoppingCartService
         return cart;
     }
 
-    public async Task<ShoppingCartDTO> AddToCart(int userId, int publicationId, int quantity)
+    public async Task<ShoppingCartDTO> AddToCart(int userId, ShoppingCartItemPostDTO shoppingCartItemDTO)
     {
+        // Validación de cantidad
+        if (shoppingCartItemDTO.Quantity <= 0)
+        {
+            throw new Exception("Quantity must be higher tan 0");
+        }
         // Obtener o crear el carrito del usuario
         var cart = await _context.ShoppingCarts
             .Include(c => c.Items)
@@ -59,18 +64,18 @@ public class ShoppingCartDbService : IShoppingCartService
         }
 
         // Buscar si el ítem ya existe en el carrito
-        var existingItem = cart.Items.FirstOrDefault(item => item.PublicationId == publicationId);
+        var existingItem = cart.Items.FirstOrDefault(item => item.PublicationId == shoppingCartItemDTO.PublicationId);
 
         if (existingItem != null)
         {
-            existingItem.Quantity += quantity;
+            existingItem.Quantity += shoppingCartItemDTO.Quantity;
         }
         else
         {
             var newItem = new ShoppingCartItem
             {
-                PublicationId = publicationId,
-                Quantity = quantity,
+                PublicationId = shoppingCartItemDTO.PublicationId,
+                Quantity = shoppingCartItemDTO.Quantity,
                 ShoppingCartId = cart.Id // Asignar el ID directamente
             };
 

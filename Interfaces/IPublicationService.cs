@@ -13,7 +13,7 @@ public interface IPublicationService
     PublicationDTO Create(int UserId, PublicationPostDTO publication);
 
     // Actualizar una publicación
-    PublicationDTO? Update(int id, PublicationPutDTO publication);
+    PublicationDTO? Update(PublicationPutDTO publication);
 
     // Eliminar una publicación por ID
     void Delete(int id);

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\uriel\\OneDrive\\Escritorio\\UAP\\Programacion II\\API Mercadolibre\\api-biblioteca.csproj": {}
+    "C:\\Users\\uriel\\OneDrive\\Escritorio\\UAP\\Programacion II\\API MercadoPlus\\api-biblioteca.csproj": {}
   },
   "projects": {
-    "C:\\Users\\uriel\\OneDrive\\Escritorio\\UAP\\Programacion II\\API Mercadolibre\\api-biblioteca.csproj": {
+    "C:\\Users\\uriel\\OneDrive\\Escritorio\\UAP\\Programacion II\\API MercadoPlus\\api-biblioteca.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\uriel\\OneDrive\\Escritorio\\UAP\\Programacion II\\API Mercadolibre\\api-biblioteca.csproj",
+        "projectUniqueName": "C:\\Users\\uriel\\OneDrive\\Escritorio\\UAP\\Programacion II\\API MercadoPlus\\api-biblioteca.csproj",
         "projectName": "api-biblioteca",
-        "projectPath": "C:\\Users\\uriel\\OneDrive\\Escritorio\\UAP\\Programacion II\\API Mercadolibre\\api-biblioteca.csproj",
+        "projectPath": "C:\\Users\\uriel\\OneDrive\\Escritorio\\UAP\\Programacion II\\API MercadoPlus\\api-biblioteca.csproj",
         "packagesPath": "C:\\Users\\uriel\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\uriel\\OneDrive\\Escritorio\\UAP\\Programacion II\\API Mercadolibre\\obj\\",
+        "outputPath": "C:\\Users\\uriel\\OneDrive\\Escritorio\\UAP\\Programacion II\\API MercadoPlus\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\uriel\\AppData\\Roaming\\NuGet\\NuGet.Config"

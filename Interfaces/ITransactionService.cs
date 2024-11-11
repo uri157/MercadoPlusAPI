@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 public interface ITransactionService
 {
-    Task<List<TransactionDTO>> GetAll(); // Obtener todas las transacciones
+    // Task<List<TransactionDTO>> GetAll(); // Obtener todas las transacciones
 
     Task<TransactionDTO> GetById(int id); // Obtener una transacción por ID
 

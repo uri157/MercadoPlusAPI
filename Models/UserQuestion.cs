@@ -11,7 +11,7 @@ public class UserQuestion
 
     public int IdPublication { get; set; } // Clave foránea a Publication
 
-    public string? Question { get; set; } // Pregunta del usuario
+    public string Question { get; set; } // Pregunta del usuario
 
     public string? Answer { get; set; } // Respuesta a la pregunta
 

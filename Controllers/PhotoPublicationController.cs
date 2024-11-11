@@ -1,56 +1,49 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// using Microsoft.AspNetCore.Authorization;
+// using Microsoft.AspNetCore.Mvc;
+// using System.Collections.Generic;
+// using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-public class PhotoPublicationController : ControllerBase
-{
-    private readonly IPhotoPublicationService _photoPublicationService;
+// [Route("api/[controller]")]
+// [ApiController]
+// public class PhotoPublicationController : ControllerBase
+// {
+//     private readonly IPhotoPublicationService _photoPublicationService;
 
-    public PhotoPublicationController(IPhotoPublicationService photoPublicationService)
-    {
-        _photoPublicationService = photoPublicationService;
-    }
+//     public PhotoPublicationController(IPhotoPublicationService photoPublicationService)
+//     {
+//         _photoPublicationService = photoPublicationService;
+//     }
 
-    // GET: api/PhotoPublication
-    [AllowAnonymous]
-    [HttpGet]
-    public ActionResult<IEnumerable<PhotoPublicationDTO>> GetPhotoPublications()
-    {
-        var photoPublications = _photoPublicationService.GetAll();
-        return Ok(photoPublications);
-    }
+//     // GET: api/PhotoPublication
+//     [AllowAnonymous]
+//     [HttpGet]
+//     public IEnumerable<PhotoPublicationDTO> GetPhotoPublications()
+//     {
+//         return _photoPublicationService.GetAll();
+//     }
 
-    // GET: api/PhotoPublication/{id}
-    [AllowAnonymous]
-    [HttpGet("{id}")]
-    public ActionResult<PhotoPublicationDTO> GetPhotoPublication(int id)
-    {
-        var photoPublication = _photoPublicationService.GetById(id);
-        if (photoPublication == null)
-        {
-            return NotFound();
-        }
-        return Ok(photoPublication);
-    }
+//     // GET: api/PhotoPublication/{id}
+//     [AllowAnonymous]
+//     [HttpGet("{id}")]
+//     public PhotoPublicationDTO GetPhotoPublication(int id)
+//     {
+//         return _photoPublicationService.GetById(id);
+//     }
 
-    // POST: api/PhotoPublication
-    [Authorize]
-    [HttpPost]
-    public ActionResult<PhotoPublicationDTO> CreatePhotoPublication(PhotoPublicationPostPutDTO createDTO)
-    {
-        var createdPhotoPublication = _photoPublicationService.Create(createDTO);
-        return CreatedAtAction(nameof(GetPhotoPublication), new { id = createdPhotoPublication.Id }, createdPhotoPublication);
-    }
+//     // POST: api/PhotoPublication
+//     [Authorize]
+//     [HttpPost]
+//     public PhotoPublicationDTO CreatePhotoPublication(PhotoPublicationPostPutDTO createDTO)
+//     {
+//         return _photoPublicationService.Create(createDTO);
+//     }
 
-    // DELETE: api/PhotoPublication/{id}
-    [Authorize]
-    [HttpDelete("{id}")]
-    public IActionResult DeletePhotoPublication(int id)
-    {
-        _photoPublicationService.Delete(id);
-        return NoContent();
-    }
-}
+//     // DELETE: api/PhotoPublication/{id}
+//     [Authorize]
+//     [HttpDelete("{id}")]
+//     public IActionResult DeletePhotoPublication(int id)
+//     {
+//         _photoPublicationService.Delete(id);
+//         return NoContent();
+//     }
+// }

@@ -28,7 +28,6 @@ public class PhotoPublicationDbService : IPhotoPublicationService
             Id = photoPublication.Id,
             IdPublication = photoPublication.IdPublication,
             IdPhoto = photoPublication.IdPhoto
-            // Aquí puedes agregar otras propiedades del DTO si es necesario
         };
     }
 
@@ -51,17 +50,17 @@ public class PhotoPublicationDbService : IPhotoPublicationService
 
     // Método para obtener todas las fotos de una publicación específica
     public IEnumerable<PhotoDTO> GetPhotosByPublicationId(int publicationId)
-{
-    return _context.Set<PhotoPublication>()
-        .Where(pp => pp.IdPublication == publicationId)
-        .Include(pp => pp.Photo) // Incluye la entidad Photo para obtener datos adicionales
-        .Select(pp => new PhotoDTO
-        {
-            Id = pp.Photo.Id,
-            ImageData = pp.Photo.ImageData // Suponiendo que Photo tiene una propiedad Url
-        })
-        .ToList();
-}
+    {
+        return _context.Set<PhotoPublication>()
+            .Where(pp => pp.IdPublication == publicationId)
+            .Include(pp => pp.Photo) // Incluye la entidad Photo para obtener datos adicionales
+            .Select(pp => new PhotoDTO
+            {
+                Id = pp.Photo.Id,
+                ImageData = pp.Photo.ImageData // Suponiendo que Photo tiene una propiedad Url
+            })
+            .ToList();
+    }
 
     // Obtener todas las relaciones PhotoPublication
     public List<PhotoPublicationDTO> GetAll()
@@ -88,6 +87,5 @@ public class PhotoPublicationDbService : IPhotoPublicationService
             _context.PhotoPublications.Remove(photoPublication);
             _context.SaveChanges();
         }
-        // Considera lanzar una excepción si no se encuentra la relación
     }
 }

@@ -7,31 +7,40 @@ using Microsoft.EntityFrameworkCore;
 public class TransactionDbService : ITransactionService
 {
     private readonly DbContext _context;
+    private readonly ICardService _cardService;
+    private readonly IPublicationService _publicationService;
     
-    public TransactionDbService(DbContext context)
+    public TransactionDbService
+    (
+    DbContext context,
+    ICardService cardService, 
+    IPublicationService publicationService
+    )
     {
         _context = context;
+        _cardService = cardService;
+        _publicationService = publicationService;
     }
 
-    // Obtener todas las transacciones
-    public async Task<List<TransactionDTO>> GetAll()
-    {
-        return await _context.Set<Transaction>()
-            .Include(t => t.Buyer)
-            .Include(t => t.Publication)
-            .Select(t => new TransactionDTO
-            {
-                Id = t.Id,
-                IdCard = t.IdCard,
-                IdBuyer = t.IdBuyer,
-                IdPublication = t.IdPublication,
-                TransactionDate = t.TransactionDate,
-                Amount = t.Amount,
-                Calification = t.Calification,
-                ReviewText = t.ReviewText
-            })
-            .ToListAsync();
-    }
+    // // Obtener todas las transacciones
+    // public async Task<List<TransactionDTO>> GetAll()
+    // {
+    //     return await _context.Set<Transaction>()
+    //         .Include(t => t.Buyer)
+    //         .Include(t => t.Publication)
+    //         .Select(t => new TransactionDTO
+    //         {
+    //             Id = t.Id,
+    //             IdCard = t.IdCard,
+    //             IdBuyer = t.IdBuyer,
+    //             IdPublication = t.IdPublication,
+    //             TransactionDate = t.TransactionDate,
+    //             Amount = t.Amount,
+    //             Calification = t.Calification,
+    //             ReviewText = t.ReviewText
+    //         })
+    //         .ToListAsync();
+    // }
 
     // Obtener una transacción por ID
     public async Task<TransactionDTO> GetById(int id)
@@ -43,7 +52,7 @@ public class TransactionDbService : ITransactionService
 
         if (transaction == null)
         {
-            return null; // o lanzar una excepción si prefieres
+            throw new Exception("Transaction not found"); // o lanzar una excepción si prefieres
         }
 
         return new TransactionDTO
@@ -61,7 +70,6 @@ public class TransactionDbService : ITransactionService
     // Crear una nueva transacción
     public async Task<TransactionDTO> Create(int userId, TransactionPostDTO transactionPostDto)
     {
-
         // Consulta la publicación para obtener el Amount
         var publication = await _context.Set<Publication>()
             .FirstOrDefaultAsync(p => p.Id == transactionPostDto.IdPublication);
@@ -103,7 +111,7 @@ public class TransactionDbService : ITransactionService
         var transaction = await _context.Set<Transaction>().FindAsync(id);
         if (transaction == null || transaction.IdBuyer != userId)
         {
-            return false; // No se encontró la transacción o el usuario no tiene permiso para actualizarla
+            throw new Exception("Transaction not found or unautorizhed"); // No se encontró la transacción o el usuario no tiene permiso para actualizarla
         }
 
         transaction.Calification = transactionPutDto.Calification;
@@ -119,7 +127,7 @@ public class TransactionDbService : ITransactionService
         var transaction = await _context.Set<Transaction>().FindAsync(id);
         if (transaction == null)
         {
-            return false; // No se encontró la transacción
+            throw new Exception("Transaction not found"); // No se encontró la transacción
         }
 
         _context.Set<Transaction>().Remove(transaction);

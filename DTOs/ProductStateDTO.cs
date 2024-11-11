@@ -13,7 +13,7 @@ public class ProductStateDTO
     public string Description { get; set; }
 }
 
-public class ProductStatePostPutDTO
+public class ProductStatePostDTO
 {
     [Required(ErrorMessage = "El campo Name es requerido.")]
     [MaxLength(100, ErrorMessage = "El campo Name no puede exceder los 100 caracteres.")]
