@@ -1,28 +1,26 @@
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration.UserSecrets;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 public class ShoppingCartDbService : IShoppingCartService
 {
     private readonly DbContext _context;
+    private readonly IShoppingCartItemService _shoppingCartItemService;
 
-    public ShoppingCartDbService(DbContext context)
+    public ShoppingCartDbService(DbContext context, IShoppingCartItemService shoppingCartItemService)
     {
         _context = context;
+        _shoppingCartItemService = shoppingCartItemService;
     }
 
-    public async Task<ShoppingCartDTO> GetCartByUserId(int userId)
+    // Implementación de GetCartByUserIdAsync
+    public async Task<ShoppingCartDTO> GetCartByUserIdAsync(int userId)
     {
-        var cart = await _context.Set<ShoppingCart>()
+        var cart = await _context.ShoppingCarts
             .Where(cart => cart.IdUser == userId)
             .Include(cart => cart.Items)
-            .ThenInclude(item => item.Publication)
+                .ThenInclude(item => item.Publication)
             .Select(cart => new ShoppingCartDTO
             {
                 Id = cart.Id,
@@ -31,6 +29,7 @@ public class ShoppingCartDbService : IShoppingCartService
                 Items = cart.Items.Select(item => new ShoppingCartItemDTO
                 {
                     Id = item.Id,
+                    ShoppingCartId = item.ShoppingCartId,
                     PublicationId = item.PublicationId,
                     Title = item.Publication.Title,
                     Price = item.Publication.Price,
@@ -42,114 +41,88 @@ public class ShoppingCartDbService : IShoppingCartService
         return cart;
     }
 
-    public async Task<ShoppingCartDTO> AddToCart(int userId, ShoppingCartItemPostDTO shoppingCartItemDTO)
+    // Implementación de AddToCartAsync
+    public async Task<ShoppingCartDTO> AddToCartAsync(int userId, ShoppingCartItemPostDTO shoppingCartItemDTO)
     {
-        // Validación de cantidad
         if (shoppingCartItemDTO.Quantity <= 0)
         {
-            throw new Exception("Quantity must be higher tan 0");
+            throw new ArgumentException("Quantity must be higher than 0", nameof(shoppingCartItemDTO.Quantity));
         }
-        // Obtener o crear el carrito del usuario
+
+        // Obtener el carrito del usuario
         var cart = await _context.ShoppingCarts
             .Include(c => c.Items)
-            .ThenInclude(i => i.Publication) // Incluir la publicación en cada ítem
+                .ThenInclude(item => item.Publication)
             .FirstOrDefaultAsync(c => c.IdUser == userId);
 
-        // Si el carrito no existe, crearlo y guardar para obtener el ID
+        // Si el carrito no existe, crearlo
         if (cart == null)
         {
             cart = new ShoppingCart { IdUser = userId };
             _context.ShoppingCarts.Add(cart);
-            await _context.SaveChangesAsync(); // Guardar para obtener cart.Id
+            await _context.SaveChangesAsync(); // Después de esto, cart.Id debería tener el valor generado
         }
+
+        // Asignar el ShoppingCartId al DTO
+        shoppingCartItemDTO.ShoppingCartId = cart.Id;
 
         // Buscar si el ítem ya existe en el carrito
         var existingItem = cart.Items.FirstOrDefault(item => item.PublicationId == shoppingCartItemDTO.PublicationId);
 
         if (existingItem != null)
         {
-            existingItem.Quantity += shoppingCartItemDTO.Quantity;
+            // Actualizar la cantidad
+            var updatedDto = new ShoppingCartItemPutDTO
+            {
+                Quantity = existingItem.Quantity + shoppingCartItemDTO.Quantity
+            };
+            await _shoppingCartItemService.UpdateAsync(userId, shoppingCartItemDTO.PublicationId, updatedDto);
         }
         else
         {
-            var newItem = new ShoppingCartItem
-            {
-                PublicationId = shoppingCartItemDTO.PublicationId,
-                Quantity = shoppingCartItemDTO.Quantity,
-                ShoppingCartId = cart.Id // Asignar el ID directamente
-            };
-
-            _context.ShoppingCartItems.Add(newItem); // Agregar directamente al contexto
+            // Crear un nuevo ítem en el carrito
+            await _shoppingCartItemService.CreateAsync(shoppingCartItemDTO);
         }
 
-        await _context.SaveChangesAsync();
-
-        // Retornar el carrito actualizado con todos los datos necesarios
-        var updatedCart = await _context.ShoppingCarts
-            .Where(c => c.Id == cart.Id)
-            .Include(c => c.Items)
-            .ThenInclude(i => i.Publication) // Incluir los datos de publicación nuevamente
-            .Select(c => new ShoppingCartDTO
-            {
-                Id = c.Id,
-                IdUser = c.IdUser,
-                Total = c.Items.Sum(item => item.Publication.Price * item.Quantity),
-                Items = c.Items.Select(item => new ShoppingCartItemDTO
-                {
-                    Id = item.Id,
-                    ShoppingCartId = item.ShoppingCartId,
-                    PublicationId = item.PublicationId,
-                    Quantity = item.Quantity,
-                    Title = item.Publication.Title,
-                    Price = item.Publication.Price
-                }).ToList()
-            })
-            .FirstOrDefaultAsync();
-
-        return updatedCart;
+        // Retornar el carrito actualizado
+        return await GetCartByUserIdAsync(userId);
     }
 
-
-   public async Task<bool> RemoveFromCart(int userId, int publicationId)
+    // Implementación de RemoveFromCartAsync
+    public async Task<bool> RemoveFromCartAsync(int userId, int publicationId)
     {
-        
-        var cart = await _context.Set<ShoppingCart>()
-            .Include(c => c.Items)
+        var cart = await _context.ShoppingCarts
             .FirstOrDefaultAsync(c => c.IdUser == userId);
 
-        // Verificar si el carrito existe y contiene el ítem
-        if (cart == null) return false;
+        if (cart == null)
+        {
+            throw new KeyNotFoundException($"No se encontró un carrito para el usuario con ID {userId}");
+        }
 
-        var cartItem = cart.Items.FirstOrDefault(item => item.PublicationId == publicationId);
-        if (cartItem == null) return false;
-
-        // Eliminar el ítem del carrito
-        _context.Set<ShoppingCartItem>().Remove(cartItem);
-        await _context.SaveChangesAsync();
+        await _shoppingCartItemService.DeleteAsync(userId, publicationId);
 
         return true;
     }
-    // Vaciar el carrito de un usuario
-    public async Task<bool> ClearCart(int userId)
+
+    // Implementación de ClearCartAsync
+    public async Task<bool> ClearCartAsync(int userId)
     {
-        // Obtener el carrito del usuario
-        var shoppingCart = await _context.Set<ShoppingCart>()
+        var shoppingCart = await _context.ShoppingCarts
             .FirstOrDefaultAsync(cart => cart.IdUser == userId);
 
-        // Si no existe el carrito, retorna false
         if (shoppingCart == null) return false;
 
-        // Obtener todos los ítems del carrito del usuario
-        var cartItems = await _context.Set<ShoppingCartItem>()
-            .Where(item => item.ShoppingCartId == shoppingCart.Id) // Verificar que el ShoppingCartId coincida
+        var cartItems = await _context.ShoppingCartItems
+            .Where(item => item.ShoppingCartId == shoppingCart.Id)
             .ToListAsync();
 
-        if (!cartItems.Any()) return false; // Si no hay ítems, retorna false
+        if (!cartItems.Any()) return false;
 
-        // Eliminar todos los ítems del carrito
-        _context.Set<ShoppingCartItem>().RemoveRange(cartItems);
-        await _context.SaveChangesAsync();
-        return true; // Retorna true si se vació el carrito
+        foreach (var item in cartItems)
+        {
+            await _shoppingCartItemService.DeleteAsync(userId, item.PublicationId);
+        }
+
+        return true;
     }
-    
 }

@@ -76,6 +76,7 @@ try
     builder.Services.AddScoped<IPhotoPublicationService, PhotoPublicationDbService>();
     builder.Services.AddScoped<ITransactionService, TransactionDbService>();
     builder.Services.AddScoped<IShoppingCartService, ShoppingCartDbService>();
+    builder.Services.AddScoped<IShoppingCartItemService, ShoppingCartItemDbService>();
     builder.Services.AddScoped<IPublicationVisitedService, PublicationVisitedDbService>();
     builder.Services.AddScoped<IMailService, MailService>();
     // builder.Services.AddHttpClient<IRecaptchaService, RecaptchaService>();

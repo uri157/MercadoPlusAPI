@@ -214,13 +214,39 @@ public class PublicationDbService : IPublicationService
         };
     }
 
+    public IEnumerable<PublicationDTO> SearchByTitle(string searchTerm)
+    {
+        var publications = _context.Publications
+            .Where(p => EF.Functions.Like(p.Title, $"%{searchTerm}%"))
+            .ToList();
+
+        return publications.Select(p => new PublicationDTO
+        {
+            Id = p.Id,
+            IdUsuario = p.UserId,
+            IdCategoria = p.IdCategoria,
+            Description = p.Description,
+            Price = p.Price,
+            Title = p.Title,
+            IdPublicationState = p.IdPublicationState,
+            IdProductState = p.IdProductState,
+            IdColor = p.IdColor,
+            Stock = p.Stock,
+            Photos = _photoPublicationService.GetPhotosByPublicationId(p.Id).Select(photo => new PhotoDTO
+            {
+                Id = photo.Id,
+                ImageData = photo.ImageData
+            }).ToList()
+        });
+    }
+
     // Actualizar una publicación
     public PublicationDTO? Update(PublicationPutDTO publicationToUpdate)
     {
         var existingPublication = _context.Publications.Find(publicationToUpdate.Id);
         if (existingPublication == null)
         {
-            throw new Exception("Failed to save the publication.");        
+            throw new Exception("Publication not found");
         }
 
         // Actualizamos los campos que podrían haber cambiado solo si no son nulos
@@ -257,6 +283,7 @@ public class PublicationDbService : IPublicationService
             existingPublication.Stock = publicationToUpdate.Stock.Value;
         }
 
+        // Guardar cambios en la base de datos
         _context.Entry(existingPublication).State = EntityState.Modified;
         _context.SaveChanges();
 
@@ -266,7 +293,7 @@ public class PublicationDbService : IPublicationService
         // Retornar el DTO con las fotos
         return new PublicationDTO
         {
-            Id = publicationToUpdate.Id,
+            Id = existingPublication.Id,
             IdUsuario = existingPublication.UserId,
             IdCategoria = existingPublication.IdCategoria,
             Description = existingPublication.Description,

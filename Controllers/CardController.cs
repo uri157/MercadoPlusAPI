@@ -121,14 +121,13 @@ public class CardController : ControllerBase
     // }
 
 
-    // Eliminar una tarjeta por ID si pertenece al usuario autenticado
     [Authorize]
     [HttpDelete("{cardId}")]
     public ActionResult Delete(int cardId)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
-        var card = _cardService.GetUserCardById(userId,cardId);
+        var card = _cardService.GetUserCardById(cardId, userId);
 
         if (card == null || card.UserId != userId)
         {
@@ -138,6 +137,7 @@ public class CardController : ControllerBase
         _cardService.Delete(cardId);
         return NoContent();
     }
+
 
    // Actualizar una tarjeta por ID si pertenece al usuario autenticado
     [Authorize]

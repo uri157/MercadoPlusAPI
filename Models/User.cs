@@ -19,6 +19,8 @@ public class User : IdentityUser<int> // Usa int como el tipo de Id si lo prefie
     public Photo? ProfilePhoto { get; set; } // Foto de perfil
     public ICollection<Transaction> Purchases { get; set; }
 
+    public ICollection<ShoppingCart> ShoppingCarts { get; set; }
+
 
     public User()
     {
@@ -28,5 +30,7 @@ public class User : IdentityUser<int> // Usa int como el tipo de Id si lo prefie
         // Reviews = new List<Review>();
         Notifications = new List<Notification>();
         Purchases = new List<Transaction>();
+        ShoppingCarts = new List<ShoppingCart>();
+
     }
 }

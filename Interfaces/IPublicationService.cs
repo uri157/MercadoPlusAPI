@@ -15,6 +15,8 @@ public interface IPublicationService
     // Actualizar una publicación
     PublicationDTO? Update(PublicationPutDTO publication);
 
+    IEnumerable<PublicationDTO> SearchByTitle(string searchTerm);
+
     // Eliminar una publicación por ID
     void Delete(int id);
 }

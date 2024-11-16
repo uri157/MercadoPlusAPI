@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -13,8 +13,6 @@ public class ShoppingCartController : ControllerBase
     public ShoppingCartController(IShoppingCartService shoppingCartService)
     {
         _shoppingCartService = shoppingCartService;
-        
-        
     }
 
     // Obtener el carrito de un usuario
@@ -22,42 +20,110 @@ public class ShoppingCartController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetCart()
     {
-         // Obtención del ID de usuario
-        int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        // Obtención del ID de usuario
+        if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out int userId))
+        {
+            return Unauthorized("Invalid user ID.");
+        }
 
-        var cart = await _shoppingCartService.GetCartByUserId(userId);
-        
+        var cart = await _shoppingCartService.GetCartByUserIdAsync(userId);
+
+        if (cart == null)
+        {
+            return NotFound("No se encontró el carrito del usuario.");
+        }
+
         return Ok(cart);
     }
 
     // Agregar una publicación al carrito
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> AddToCart(ShoppingCartItemPostDTO shoppingCartItemDTO)
+    public async Task<IActionResult> AddToCart([FromBody] ShoppingCartItemPostDTO shoppingCartItemDTO)
     {
-        int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-        // Agregar al carrito
-        var cart = await _shoppingCartService.AddToCart(userId, shoppingCartItemDTO);
+        if (shoppingCartItemDTO == null)
+        {
+            return BadRequest("Datos del carrito inválidos.");
+        }
 
-        return Ok(cart);
-      
+        if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out int userId))
+        {
+            return Unauthorized("Invalid user ID.");
+        }
+
+        // Agregar al carrito
+        try
+        {
+            var cart = await _shoppingCartService.AddToCartAsync(userId, shoppingCartItemDTO);
+            return Ok(cart);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            // Manejo genérico de excepciones
+            return StatusCode(500, $"Ocurrió un error: {ex.Message}");
+        }
     }
 
+    // Remover un producto del carrito
     [Authorize]
-    [HttpDelete]
+    [HttpDelete("{publicationId}")]
     public async Task<IActionResult> RemoveFromCart(int publicationId)
-    {   
-        int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-        _shoppingCartService.RemoveFromCart(userId, publicationId);
-        return Ok("Producto eliminado del carrito.");
+    {
+        if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out int userId))
+        {
+            return Unauthorized("Invalid user ID.");
+        }
+
+        try
+        {
+            await _shoppingCartService.RemoveFromCartAsync(userId, publicationId);
+            return Ok("Producto eliminado del carrito.");
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            // Manejo genérico de excepciones
+            return StatusCode(500, $"Ocurrió un error: {ex.Message}");
+        }
     }
 
     // Vaciar el carrito
     [Authorize]
-    [HttpDelete("/clear")]
-    public async Task<IActionResult> ClearCart(int userId)
+    [HttpDelete("clear")]
+    public async Task<IActionResult> ClearCart()
     {
-        var result = await _shoppingCartService.ClearCart(userId);
-        return Ok("Carrito vaciado.");
+        if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out int userId))
+        {
+            return Unauthorized("Invalid user ID.");
+        }
+
+        try
+        {
+            var result = await _shoppingCartService.ClearCartAsync(userId);
+            if (result)
+            {
+                return Ok("Carrito vaciado.");
+            }
+            else
+            {
+                return NotFound("No se encontró el carrito del usuario o ya está vacío.");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Manejo genérico de excepciones
+            return StatusCode(500, $"Ocurrió un error: {ex.Message}");
+        }
     }
 }

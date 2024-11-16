@@ -39,7 +39,17 @@ public class PublicationController : ControllerBase
         return _publicationService.GetByCategoryName(categoryName);
     }
 
+    // Endpoint para buscar publicaciones por título
+    [AllowAnonymous]
+    [HttpGet("search")]
+    public ActionResult<IEnumerable<PublicationDTO>> SearchPublications(string searchTerm)
+    {
+        var publications = _publicationService.SearchByTitle(searchTerm);
+        return Ok(publications);
+    }
 
+    
+    
     // Obtener una publicación por ID
     [AllowAnonymous]
     [HttpGet("{id}")]

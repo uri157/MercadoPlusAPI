@@ -13,4 +13,7 @@ public interface ITransactionService
     Task<bool> Update(int id, int userId, TransactionPutDTO transactionPutDto); // Actualizar una transacción existente
 
     Task<bool> Delete(int id); // Eliminar una transacción por ID
+    Task<List<TransactionDTO>> GetTransactionsByPublicationIdAsync(int publicationId);
+
+    Task<List<TransactionDTO>> GetTransactionsByUserIdAsync(int userId);
 }

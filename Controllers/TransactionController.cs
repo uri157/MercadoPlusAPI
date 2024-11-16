@@ -85,6 +85,23 @@ public class TransactionController : ControllerBase
 
         return CreatedAtAction(nameof(GetById), new { id = transaction.Id }, transaction);
     }
+    [Authorize]
+    [HttpGet("by-publication/{publicationId}")]
+    public async Task<ActionResult<List<TransactionDTO>>> GetTransactionsByPublication(int publicationId)
+    {
+        var transactions = await _transactionService.GetTransactionsByPublicationIdAsync(publicationId);
+        return Ok(transactions);
+    }
+
+    // Obtener transacciones del usuario autenticado
+    [Authorize]
+    [HttpGet("by-user")]
+    public async Task<ActionResult<List<TransactionDTO>>> GetTransactionsByUser()
+    {
+        int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        var transactions = await _transactionService.GetTransactionsByUserIdAsync(userId);
+        return Ok(transactions);
+    }
 
     // Actualizar una transacción existente
     [Authorize]

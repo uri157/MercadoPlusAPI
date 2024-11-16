@@ -74,10 +74,10 @@ public class DbContext : IdentityDbContext<User, IdentityRole<int>, int>
         });
 
         modelBuilder.Entity<ShoppingCart>()
-            .HasOne(cart => cart.User)
-            .WithOne()
-            .HasForeignKey<ShoppingCart>(cart => cart.IdUser)
-            .OnDelete(DeleteBehavior.Restrict);
+        .HasOne(cart => cart.User)
+        .WithMany(u => u.ShoppingCarts) // Asegúrate de que la entidad User tenga una colección ShoppingCarts
+        .HasForeignKey(cart => cart.IdUser)
+        .OnDelete(DeleteBehavior.Restrict);
 
         // ShoppingCart - ShoppingCartItem (One-to-Many)
         modelBuilder.Entity<ShoppingCart>()

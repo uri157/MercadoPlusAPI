@@ -1,4 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 public class WishedArticleDbService : IWishedArticleService
 {
@@ -9,43 +13,43 @@ public class WishedArticleDbService : IWishedArticleService
         _context = context;
     }
 
-    // Crear un WishedArticle
-    public WishedArticleDTO Create(int idUser, WishedArticlePostPutDTO dto)
+    // Crear un WishedArticle de manera asíncrona
+    public async Task<WishedArticleDTO> CreateAsync(int idUser, WishedArticlePostPutDTO dto)
     {
-        WishedArticle newWishedArticle = new()
+        var newWishedArticle = new WishedArticle
         {
             IdUser = idUser,
             IdPublication = dto.IdPublication
         };
 
         _context.WishedArticles.Add(newWishedArticle);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         return new WishedArticleDTO
-            {
-                Id = newWishedArticle.Id,
-                IdUser = newWishedArticle.IdUser,
-                IdPublication = newWishedArticle.IdPublication
-            };
-
+        {
+            Id = newWishedArticle.Id,
+            IdUser = newWishedArticle.IdUser,
+            IdPublication = newWishedArticle.IdPublication
+        };
     }
 
-    // Obtener todos los WishedArticles
-    public IEnumerable<WishedArticleDTO> GetAll()
+    // Obtener todos los WishedArticles de manera asíncrona
+    public async Task<IEnumerable<WishedArticleDTO>> GetAllAsync()
     {
-        return _context.WishedArticles
+        return await _context.WishedArticles
             .Select(wa => new WishedArticleDTO
             {
                 Id = wa.Id,
                 IdUser = wa.IdUser,
                 IdPublication = wa.IdPublication
-            }).ToList();
+            })
+            .ToListAsync();
     }
 
-    // Obtener un WishedArticle por ID
-    public WishedArticleDTO? GetById(int id)
+    // Obtener un WishedArticle por ID de manera asíncrona
+    public async Task<WishedArticleDTO?> GetByIdAsync(int id)
     {
-        var wa = _context.WishedArticles.Find(id);
+        var wa = await _context.WishedArticles.FindAsync(id);
         if (wa == null)
         {
             return null;
@@ -59,28 +63,29 @@ public class WishedArticleDbService : IWishedArticleService
         };
     }
 
-    // Eliminar un WishedArticle
-    public void Delete(int id)
+    // Eliminar un WishedArticle de manera asíncrona
+    public async Task DeleteAsync(int id)
     {
-        var wa = _context.WishedArticles.Find(id);
+        var wa = await _context.WishedArticles.FindAsync(id);
         if (wa != null)
         {
             _context.WishedArticles.Remove(wa);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
     }
 
-    // Actualizar un WishedArticle
-    public WishedArticleDTO? Update(int id, int idUser, WishedArticlePostPutDTO dto)
+    // Actualizar un WishedArticle de manera asíncrona
+    public async Task<WishedArticleDTO?> UpdateAsync(int id, int idUser, WishedArticlePostPutDTO dto)
     {
-        var wa = _context.WishedArticles.Find(id);
+        var wa = await _context.WishedArticles.FindAsync(id);
         if (wa != null)
         {
             wa.IdUser = idUser;
             wa.IdPublication = dto.IdPublication;
 
             _context.Entry(wa).State = EntityState.Modified;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+
             return new WishedArticleDTO
             {
                 Id = wa.Id,
@@ -90,5 +95,18 @@ public class WishedArticleDbService : IWishedArticleService
         }
 
         return null;
+    }
+
+    public async Task<IEnumerable<WishedArticleDTO>> GetAllByUserIdAsync(int userId)
+    {
+        return await _context.WishedArticles
+            .Where(wa => wa.IdUser == userId)
+            .Select(wa => new WishedArticleDTO
+            {
+                Id = wa.Id,
+                IdUser = wa.IdUser,
+                IdPublication = wa.IdPublication
+            })
+            .ToListAsync();
     }
 }

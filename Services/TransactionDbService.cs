@@ -121,6 +121,27 @@ public class TransactionDbService : ITransactionService
         return true;
     }
 
+
+    // Obtener transacciones por usuario
+    public async Task<List<TransactionDTO>> GetTransactionsByUserIdAsync(int userId)
+    {
+        return await _context.Set<Transaction>()
+            .Where(t => t.IdBuyer == userId)
+            .Select(t => new TransactionDTO
+            {
+                Id = t.Id,
+                IdBuyer = t.IdBuyer,
+                IdPublication = t.IdPublication,
+                TransactionDate = t.TransactionDate,
+                Amount = t.Amount,
+                Calification = t.Calification,
+                ReviewText = t.ReviewText
+            })
+            .ToListAsync();
+    }
+
+
+
     // Eliminar una transacción por ID
     public async Task<bool> Delete(int id)
     {
@@ -134,4 +155,24 @@ public class TransactionDbService : ITransactionService
         await _context.SaveChangesAsync();
         return true;
     }
+
+    // Obtener transacciones por publicación
+    public async Task<List<TransactionDTO>> GetTransactionsByPublicationIdAsync(int publicationId)
+    {
+        return await _context.Set<Transaction>()
+            .Where(t => t.IdPublication == publicationId)
+            .Select(t => new TransactionDTO
+            {
+                Id = t.Id,
+                IdBuyer = t.IdBuyer,
+                IdPublication = t.IdPublication,
+                TransactionDate = t.TransactionDate,
+                Amount = t.Amount,
+                Calification = t.Calification,
+                ReviewText = t.ReviewText
+            })
+            .ToListAsync();
+    }
+
+
 }
